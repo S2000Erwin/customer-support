@@ -10,8 +10,6 @@ For order inquiries, use the authenticated customer's order lookup. Only disclos
 
 Standard-tier items may be returned within 30 days of delivery; Plus-tier items may be returned within 45 days. Items must be unused and in their original packaging. Support staff should verify the customer’s tier and delivery date before promising a refund or exchange.
 
-ALWAYS re-confirm with the customer if they really want to return an item before submitting a support ticket or performing escalation.
-
 ### Maximum Refund Amount
 
 After confirming return eligibility, Plus-tier customers with an active contract may receive refunds below $2,000 without escalation. Plus-tier refunds of $2,000 or more require supervisor escalation. For Standard-tier and other non-Plus customers with an active contract, refunds of $1,000 or more require supervisor escalation; refunds below $1,000 do not. If the customer's contract is expired, every return or refund request must be escalated, regardless of tier or amount. Never promise a refund before checking contract status, tier, and return eligibility.
