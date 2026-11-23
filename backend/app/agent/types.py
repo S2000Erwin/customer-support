@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
-
 OutcomeKind = Literal["tool_use", "end_turn", "end_chat"]
 
 
@@ -39,5 +38,7 @@ class AgentContext:
 
 
 class AgentModel:
-    async def respond(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]) -> ModelOutcome:
+    async def respond(
+        self, messages: list[dict[str, Any]], tools: list[dict[str, Any]]
+    ) -> ModelOutcome:
         raise NotImplementedError

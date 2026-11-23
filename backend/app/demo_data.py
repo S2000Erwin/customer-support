@@ -28,8 +28,20 @@ MOCK_CUSTOMERS = {
 }
 
 MOCK_CASES = [
-    {"id": "case_203", "customer_id": "cus_1001", "subject": "Delayed shipment", "status": "open", "updated_at": "2026-11-19"},
-    {"id": "case_188", "customer_id": "cus_1002", "subject": "Update billing address", "status": "resolved", "updated_at": "2026-11-15"},
+    {
+        "id": "case_203",
+        "customer_id": "cus_1001",
+        "subject": "Delayed shipment",
+        "status": "open",
+        "updated_at": "2026-11-19",
+    },
+    {
+        "id": "case_188",
+        "customer_id": "cus_1002",
+        "subject": "Update billing address",
+        "status": "resolved",
+        "updated_at": "2026-11-15",
+    },
 ]
 
 MOCK_ORDERS = [

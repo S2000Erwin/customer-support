@@ -33,7 +33,18 @@ class VoiceTurnRequest(BaseModel):
 
 
 class ChatEvent(BaseModel):
-    type: Literal["status", "message", "tool_call", "tool_result", "citation", "login_required", "escalation_required", "session_logout", "error", "done"]
+    type: Literal[
+        "status",
+        "message",
+        "tool_call",
+        "tool_result",
+        "citation",
+        "login_required",
+        "escalation_required",
+        "session_logout",
+        "error",
+        "done",
+    ]
     data: dict[str, Any] = Field(default_factory=dict)
 
 

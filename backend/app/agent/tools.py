@@ -4,6 +4,14 @@ from typing import Any
 from app.agent.types import AgentContext
 
 
+class ToolError(Exception):
+    """Raised by a tool handler to return an error payload to the model."""
+
+    def __init__(self, payload: dict[str, Any]) -> None:
+        super().__init__(payload.get("error", ""))
+        self.payload = payload
+
+
 ToolHandler = Callable[[dict[str, Any], AgentContext], Awaitable[dict[str, Any]]]
 
 
@@ -23,24 +31,40 @@ class ToolRegistry:
     def declarations(self) -> list[dict[str, Any]]:
         return self._declarations
 
-    async def execute(self, name: str, arguments: dict[str, Any], context: AgentContext) -> dict[str, Any]:
+    async def execute(
+        self, name: str, arguments: dict[str, Any], context: AgentContext
+    ) -> dict[str, Any]:
         handler = self._handlers.get(name)
         if handler is None:
             return {"ok": False, "error": "Unknown tool."}
         schema = self._schemas[name]
         properties = schema.get("properties", {})
         required = schema.get("required", [])
-        if not isinstance(arguments, dict) or any(key not in properties for key in arguments):
+        if not isinstance(arguments, dict) or any(
+            key not in properties for key in arguments
+        ):
             return {"ok": False, "error": "Tool arguments contain unsupported fields."}
         missing = [key for key in required if key not in arguments]
         if missing:
             return {"ok": False, "error": f"Missing required argument: {missing[0]}"}
-        type_map = {"string": str, "integer": int, "number": (int, float), "boolean": bool, "object": dict, "array": list}
+        type_map = {
+            "string": str,
+            "integer": int,
+            "number": (int, float),
+            "boolean": bool,
+            "object": dict,
+            "array": list,
+        }
         for key, value in arguments.items():
             expected = type_map.get(properties[key].get("type"))
-            if expected and (not isinstance(value, expected) or (expected is int and isinstance(value, bool))):
+            if expected and (
+                not isinstance(value, expected)
+                or (expected is int and isinstance(value, bool))
+            ):
                 return {"ok": False, "error": f"Invalid type for argument: {key}"}
         try:
             return await handler(arguments, context)
+        except ToolError as exc:
+            return exc.payload
         except (ValueError, KeyError) as exc:
             return {"ok": False, "error": str(exc)}
