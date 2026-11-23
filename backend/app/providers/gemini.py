@@ -84,13 +84,10 @@ class GeminiAgentModel(AgentModel):
         self.system_prompt = SYSTEM_PROMPT.format(company_name=company_name)
 
     async def respond(self, messages: list[dict], tools: list[dict]) -> ModelOutcome:
-        gemini_tools = [
-            types.Tool(
-                function_declarations=[
-                    types.FunctionDeclaration(**decl) for decl in tools
-                ]
-            )
+        declarations = [
+            types.FunctionDeclaration.model_validate(decl) for decl in tools
         ]
+        gemini_tools = [types.Tool(function_declarations=declarations)]
         contents = []
         for message in messages:
             role = message["role"]

@@ -66,7 +66,7 @@ class ManualRag:
     def __init__(self) -> None:
         self.settings = get_settings()
         self.manual_chunks = load_manual_chunks()
-        self.client = None
+        self.client: genai.Client | None = None
         self.qdrant: QdrantClient | None = None
         self.ready = False
 
@@ -114,6 +114,8 @@ class ManualRag:
             )
 
     async def _sync_manual_points(self) -> None:
+        if self.qdrant is None:
+            return
         existing, _ = self.qdrant.scroll(
             collection_name=self.settings.qdrant_collection,
             limit=1000,
@@ -129,14 +131,14 @@ class ManualRag:
             point.id for point in existing if isinstance(point.id, int)
         ]
         next_point_id = max(numeric_point_ids, default=0) + 1
-        changed: list[tuple[int, dict[str, str]]] = []
+        changed: list[tuple[models.ExtendedPointId, dict[str, str]]] = []
         for item in self.manual_chunks:
             existing_point = existing_by_id.get(item["id"])
             if existing_point is None:
                 changed.append((next_point_id, item))
                 next_point_id += 1
             elif any(
-                existing_point.payload.get(key) != item[key]
+                (existing_point.payload or {}).get(key) != item[key]
                 for key in ("title", "text")
             ):
                 changed.append((existing_point.id, item))
@@ -172,25 +174,33 @@ class ManualRag:
         )
 
     async def _embed(self, texts: list[str]) -> list[list[float]]:
+        if self.client is None:
+            raise RuntimeError("Gemini client is not initialized")
         result = await self.client.aio.models.embed_content(
             model="gemini-embedding-001",
             contents=texts,
             config={"output_dimensionality": 768},
         )
-        return [embedding.values for embedding in result.embeddings]
+        vectors = [embedding.values for embedding in result.embeddings or []]
+        if len(vectors) != len(texts) or any(v is None for v in vectors):
+            raise ValueError(
+                f"Embedding response incomplete: expected {len(texts)} vectors"
+            )
+        return [v for v in vectors if v is not None]
 
     async def search(self, query: str) -> dict:
-        if self.ready and self.qdrant is not None:
+        if self.ready and self.qdrant is not None and self.client is not None:
+            client = self.client
             try:
                 retrieval_query = query
                 # Small model call is isolated to retrieval preparation; the main agent owns the answer.
                 try:
-                    rewrite = await self.client.aio.models.generate_content(
+                    rewrite = await client.aio.models.generate_content(
                         model=self.settings.gemini_rag_model,
                         contents=f"Rewrite this support question as a concise search query. Return only the query.\nQuestion: {query}",
                         config={"temperature": 0.1, "max_output_tokens": 48},
                     )
-                    retrieval_query = (rewrite.text or query).strip()
+                    retrieval_query = (rewrite.text or "").strip() or query
                 except Exception as exc:  # noqa: BLE001
                     logger.warning(
                         "rag_query_rewrite_failed error_type=%s fallback=original-query",

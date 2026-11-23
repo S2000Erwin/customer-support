@@ -13,6 +13,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from redis.asyncio import Redis
+from redis.typing import EncodableT, FieldT
 
 from app.config import get_settings
 
@@ -109,7 +110,7 @@ class EscalationQueue:
                 "The support ticket queue is unavailable. Start Redis and restart the backend."
             )
         reference = f"SUP-{datetime.now(UTC):%y%m%d}-{uuid4().hex[:6].upper()}"
-        ticket = {
+        ticket: dict[FieldT, EncodableT] = {
             "reference": reference,
             "created_at": datetime.now(UTC).isoformat(),
             "case_id": case_id,
