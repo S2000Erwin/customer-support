@@ -1,0 +1,9 @@
+.privacy-note { display: none !important; }
+.context-panel::after {
+  content: "Free tier data note: Google may use free-tier Gemini API content to improve products. Do not enter real customer data.";
+  display: block;
+  padding: 12px 7px;
+  color: #96734c;
+  font-size: 8px;
+  line-height: 1.55;
+}

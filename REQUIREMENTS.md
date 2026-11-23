@@ -1,0 +1,41 @@
+Implementing a generic customer support agent loop
+- hook up to LLM
+- select an LLM that can return end_chat indicator, tool_use, etc.
+- Later, add audio streaming to Live Model or LLM and TTS from LLM. So the selection of LLM or API is critical.
+- The Customer Support scenario should have a manual, some tool_use, a customer database etc.
+- Postgres DB is used for customer db.
+- Qdrant is used for RAGging of the manual.
+- Use a light LLM model for RAG purpose.
+- Use a large LLM model or streaming model for agent purpose.
+- Will deploy to Vercel
+- use React for frontend and Python FastAPI for backend
+- implement a chat page first, add optional voice later
+- implement a back office webapp also to indicate the following:
+  - real time usage analysis
+  - user prompt history in collapsible tree
+  - time and latency analysis
+- enforce confidence guardrails:
+  - explicit similarity threshold or secondary verification checks to prevent hallucinations on out-of-scope queries
+  - routing low-confidence cases to human escalation state.
+- provides real-time observability
+- graceful failure recovery
+- real-time step status indicators (e.g. "Searching Knowledge Base...", "Verifying Account Tier...")
+- Gemini Multimodal Live API
+- audio waveform feedback, live transcripts and interruption handling
+- Observability Drawer:
+  - a collapsible panel show prompt traces
+  - end-to-end latency metrics, token usage and estimated API cost
+- equip the agent with an automonous reasoning loop (LangGraph, Mastra or a custom state machine) capable of chaining at least 3 mock tool calls.
+  - verify mock user identity, subscription tier, and contract status
+  - retrieve relevant policy docs or troubleshooting guids based on the user's tier
+  - execute a simulated action (e.g. issue a mock refund with policy limits, update an account field or generate a structured escalation ticket).
+  - stream live status updates to the UI whenever a tool starts or completes
+- Resilience and State Management
+  - Error Recovery: Graceful fallback UI states or upstream LLM timeouts, rate limits, or simulated tool failures  mid-conversation
+  - Session State: consistent multi-turn memory across both text and voice modes.
+
+  README.md
+  - include full source code, explaining architecture, chunking choices, and key trade-offs
+  - live demo link: deployed prototype URL (e.g. Vercel, Render, Railway, AWS)
+  - Loom Walkthrough 3~5 minutes: Brief screen + webcam video demon live chat and voice interaction (including interruption handling), multi-step tool execution, and a quick walkthru of your RAG and guardrail logic
+
