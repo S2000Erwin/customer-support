@@ -19,7 +19,7 @@ The support agent answers customer questions in text or voice, looks up account 
   | Voice | `GEMINI_LIVE_MODEL` (`gemini-3.8-live`) | Native audio streaming with low latency, interruption handling and live transcripts. |
 
   Embeddings use `gemini-embedding-001`.
-- **Guardrail to prevent hallucination**: every manual search reports a confidence score, the highest cosine similarity among the top 3 chunks. Chunks below `RAG_MIN_SIMILARITY` (default 0.5; keyword fallback uses `rag_min_keyword_overlap`) are discarded. If none remain, the agent does not answer from its own knowledge. It tells the customer it couldn't find a reliable answer and creates a `low_confidence` escalation ticket for a human. The system prompt also tells the agent never to invent customer or order data, and never to say a ticket or action succeeded unless the tool result confirms it.
+- **Guardrail to prevent hallucination**: every manual search reports a confidence score, the highest cosine similarity among the top 3 chunks. Chunks below `RAG_MIN_SIMILARITY` (default 0.52; keyword fallback uses `rag_min_keyword_overlap`) are discarded. If none remain, the agent does not answer from its own knowledge. It tells the customer it couldn't find a reliable answer and creates a `low_confidence` escalation ticket for a human. The system prompt also tells the agent never to invent customer or order data, and never to say a ticket or action succeeded unless the tool result confirms it.
 
 ## Architecture
 
@@ -147,7 +147,7 @@ Set `COMPANY_NAME` in `backend/.env` to customize the company displayed in the c
 
 ## RAG confidence threshold
 
-use RAG_MIN_SIMILARITY in .env to set confidence threshold
+use RAG_MIN_SIMILARITY in .env to set confidence threshold, otherwise 0.52 is used as per `backend/app/confiug.py`
 
 ## Example tool uses
 
@@ -180,14 +180,13 @@ Tool Calls are in a different color
 
 ## Voice
 
-Follow [ephemeral token guidance from Google](https://aistudio.google.com/docs/live-api/ephemeral-tokens)
-3 problems were encountered and mitigations:
-* while login is displaying, the voice path was stopped. It is mitigated by blocking the dialog box while the agent speaks.
-* after login, the first request was missed. It is mitigated by re-queue the request.
-* when the AI agent speaks, the same voice should be canceled in the microphone to avoid mistaken interruption. Migitgated by using WebRTC loopback
-
-Echo cancellation and interruption is done by the following setting:
-getUserMedia is called with echoCancellation: true in transport.ts
+* Follow [ephemeral token guidance from Google](https://aistudio.google.com/docs/live-api/ephemeral-tokens)
+* 3 problems were encountered and mitigations:
+  * while login is displaying, the voice path was stopped. It is mitigated by blocking the dialog box while the agent speaks.
+  * after login, the first request was missed. It is mitigated by re-queue the request.
+  * when the AI agent speaks, the same voice should be canceled in the microphone to avoid mistaken interruption. Migitgated by using WebRTC loopback
+* Echo cancellation and interruption is done by the following setting:
+  * getUserMedia is called with echoCancellation: true in transport.ts
 
 
 
